@@ -109,8 +109,8 @@ def download(url: str, dest: Path) -> None:
 
 def extract_artifact_url(kind: str, result: dict) -> str:
     """fal response shapes vary by model — pluck the right url."""
-    # nano-banana: {"images": [{"url": "..."}]}
-    # vidu i2v:    {"video": {"url": "..."}}
+    # gemini-3.1-flash-image-preview: {"images": [{"url": "..."}]}
+    # vidu i2v:                       {"video": {"url": "..."}}
     if kind == "characters":
         images = result.get("images") or []
         if images and isinstance(images, list):

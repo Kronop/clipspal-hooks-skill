@@ -1,6 +1,6 @@
 ---
 name: clipspal-hooks
-description: Generate 5 TikTok-ready hook videos from a folder of b-roll. Builds a 5-row character matrix, renders each character as a still via fal-ai/nano-banana, animates them into 3s reaction clips via fal-ai/vidu/q3/image-to-video, concatenates with the user's b-roll, and burns in captions with ffmpeg. Use when the user wants TikTok hooks, AI UGC reactions, or short-form video openers for an app, product, or content niche.
+description: Generate 5 TikTok-ready hook videos from a folder of b-roll. Builds a 5-row character matrix, renders each character as a still via fal-ai/gemini-3.1-flash-image-preview, animates them into 3s reaction clips via fal-ai/vidu/q3/image-to-video, concatenates with the user's b-roll, and burns in captions with ffmpeg. Use when the user wants TikTok hooks, AI UGC reactions, or short-form video openers for an app, product, or content niche.
 ---
 
 # ClipsPal Hooks
@@ -26,7 +26,7 @@ clipspal.com.
    No LLM API calls — you ARE the model. Matrix → `prompts/matrix.md`.
    Hooks → `prompts/hooks.md` + `reference/hook-library.json`.
 5. **3-second clips, Vidu q3 image-to-video.** Never Kling, never 5s.
-6. **nano-banana for images.** Never Flux, never Imagen.
+6. **`fal-ai/gemini-3.1-flash-image-preview` (Nano Banana 2) for character stills.** Never Flux, Imagen, or the older `fal-ai/nano-banana` — the prod ClipsPal pipeline is on Gemini 3.1 Flash Image and this skill must match it.
 7. **Default count is 5.** Only generate more if the user says so.
 8. **MANDATORY checkpoints — wait for explicit user approval at each:**
    - After step 0 (intake) — confirm cost + folder name before any spend
@@ -118,9 +118,9 @@ they can see exactly where the videos will land. e.g.
 Before generating, print:
 
 > This run will use your fal.ai credits:
->   - 5 nano-banana character images (~USD 0.20)
+>   - 5 Gemini 3.1 Flash Image character stills at 1K (~USD 0.40)
 >   - 5 Vidu 3s reaction clips (~USD 0.75)
->   - Total: ~USD 0.95
+>   - Total: ~USD 1.15
 > Reply "yes" to proceed.
 
 (Use "USD 0.XX" instead of "$0.XX" — bare `$0` gets substituted with the
@@ -168,12 +168,12 @@ Pick 5 templates, fill in slots in audience language, write
 python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set hooks done
 ```
 
-## STEP 5 — Characters (nano-banana, 5 parallel jobs)
+## STEP 5 — Characters (gemini-3.1-flash-image-preview, 5 parallel jobs)
 
 Each character is a still image — the first frame Vidu will animate from
-next step. Build the nano-banana prompt from each matrix row using the
-template in `${CLAUDE_SKILL_DIR}/reference/fal-endpoints.md` (which
-REQUIRES centered framing language — use it verbatim).
+next step. Build the prompt from each matrix row using the template in
+`${CLAUDE_SKILL_DIR}/reference/fal-endpoints.md` (which REQUIRES centered
+framing language — use it verbatim).
 
 Write `<wd>/payloads/character_<n>.json`:
 ```json
@@ -181,14 +181,15 @@ Write `<wd>/payloads/character_<n>.json`:
   "prompt": "<built prompt>",
   "num_images": 1,
   "output_format": "png",
-  "aspect_ratio": "9:16"
+  "aspect_ratio": "9:16",
+  "resolution": "1K"
 }
 ```
 
 Submit all 5:
 ```
 for n in 1 2 3 4 5; do
-  python3 ${CLAUDE_SKILL_DIR}/scripts/fal_submit.py characters $n fal-ai/nano-banana \
+  python3 ${CLAUDE_SKILL_DIR}/scripts/fal_submit.py characters $n fal-ai/gemini-3.1-flash-image-preview \
     $PROJECT_DIR/payloads/character_$n.json &
 done; wait
 ```
@@ -229,8 +230,10 @@ key = open(os.path.expanduser("~/.clipspal/fal_key")).read().strip() if not os.e
 for slot in state["characters"]:
     rid = slot["request_id"]
     req = urllib.request.Request(
-        f"https://queue.fal.run/fal-ai/nano-banana/requests/{rid}",
+        f"https://queue.fal.run/fal-ai/gemini-3.1-flash-image-preview/requests/{rid}",
         headers={"Authorization": f"Key {key}"})
+    # ^ matches the model_id submitted in step 5. If you change models,
+    #   change this URL too.
     print(slot["n"], json.load(urllib.request.urlopen(req))["images"][0]["url"])
 ```
 

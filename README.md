@@ -12,7 +12,9 @@ in Claude Code.
 2. The skill generates a 5-row character matrix (different demographics,
    settings, reactions) tailored to your audience.
 3. Each row is rendered as a centered, photorealistic UGC character
-   (a still image) via `fal-ai/nano-banana`.
+   (a still image) via `fal-ai/gemini-3.1-flash-image-preview`
+   (Nano Banana 2 / Gemini 3.1 Flash Image — the same model the prod
+   ClipsPal pipeline uses).
 4. Each character is animated into a 3-second reaction clip via
    `fal-ai/vidu/q3/image-to-video`.
 5. Five hook lines are picked from a curated library and tailored to your
@@ -30,9 +32,9 @@ b-roll so you can find them, not buried in some unrelated cwd.
 You bring your own [fal.ai API key](https://fal.ai/dashboard/keys). One
 run costs your fal account roughly:
 
-- 5 nano-banana character images: ~$0.20
+- 5 Gemini 3.1 Flash Image character stills at 1K: ~$0.40
 - 5 Vidu 3-second clips: ~$0.75
-- **Total: ~$0.95**
+- **Total: ~$1.15** (bump character resolution to 2K for ~$1.35)
 
 ## Install
 

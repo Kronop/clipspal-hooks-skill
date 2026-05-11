@@ -1,9 +1,9 @@
 # Character Matrix Generator
 
 You are generating a 5-row character matrix for AI-generated TikTok reaction
-hook clips. Each row drives one nano-banana character still — that still
-is the first frame Vidu animates from in the next step (~3s reaction
-clip via Vidu i2v).
+hook clips. Each row drives one Gemini 3.1 Flash Image character still
+(via `fal-ai/gemini-3.1-flash-image-preview`) — that still is the first
+frame Vidu animates from in the next step (~3s reaction clip via Vidu i2v).
 
 The goal is **diversity that feels native to TikTok**: different demographics,
 settings, lighting, emotions, and framing across the 5 rows. The viewer should
@@ -47,8 +47,8 @@ A JSON array of exactly 5 objects, each with these keys:
 2. **Subject MUST be centered.** Every `framing` field must explicitly say
    "subject centered horizontally in the frame, face fully in frame, no
    cropping of the head or face, head positioned in the upper-middle of the
-   9:16 canvas." nano-banana often pushes the character to a side when the
-   prompt is ambiguous — say "centered" out loud so it sticks. Never use
+   9:16 canvas." The image model often pushes the character to a side when
+   the prompt is ambiguous — say "centered" out loud so it sticks. Never use
    off-center compositions for hook clips; the text overlay sits center-top,
    so the face must sit center-middle.
 

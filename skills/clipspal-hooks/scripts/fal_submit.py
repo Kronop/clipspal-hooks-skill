@@ -8,7 +8,7 @@ Usage:
 Where:
   kind        = characters | clips
   n           = 1..5 (slot number)
-  model_id    = e.g. "fal-ai/nano-banana" or "fal-ai/vidu/q3/image-to-video"
+  model_id    = e.g. "fal-ai/gemini-3.1-flash-image-preview" or "fal-ai/vidu/q3/image-to-video"
   params_json = path to a JSON file containing the input payload
 
 Exit codes:

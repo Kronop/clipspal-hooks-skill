@@ -10,9 +10,12 @@ Queue API:
 
 ## Models
 
-### `fal-ai/nano-banana` — character still
+### `fal-ai/gemini-3.1-flash-image-preview` — character still
 Used for: rendering each character matrix row into a still image. This
 still is the first frame Vidu will animate from in the next step.
+
+Same model the ClipsPal prod pipeline uses (Nano Banana 2 / Gemini 3.1
+Flash Image). Replaces the older `fal-ai/nano-banana` (Gemini 2.5).
 
 Input payload (write to `params.json` and pass to `fal_submit.py`):
 
@@ -21,9 +24,14 @@ Input payload (write to `params.json` and pass to `fal_submit.py`):
   "prompt": "<built from one matrix row — see prompt template below>",
   "num_images": 1,
   "output_format": "png",
-  "aspect_ratio": "9:16"
+  "aspect_ratio": "9:16",
+  "resolution": "1K"
 }
 ```
+
+`resolution` options: `0.5K | 1K | 2K | 4K`. Default `1K` matches what
+the prod pipeline produces and keeps cost reasonable. Bump to `2K` for
+sharper hero stills (≈1.5× cost).
 
 **Prompt template (build per row):**
 
@@ -45,7 +53,7 @@ Input payload:
 
 ```json
 {
-  "image_url": "<data uri or signed url to the character still from nano-banana>",
+  "image_url": "<data uri or signed url to the character still>",
   "prompt": "<motion description from the matrix row>",
   "duration": 3
 }
@@ -53,9 +61,9 @@ Input payload:
 
 Notes:
 - Duration is an integer in seconds. We always pass `3`.
-- `image_url` can be a `data:image/png;base64,...` URI or the fal CDN url
-  returned by the nano-banana result. Easiest: pass the fal CDN url directly
-  from the nano-banana response.
+- `image_url` can be a `data:image/png;base64,...` URI or the fal CDN
+  url returned by the gemini-3.1-flash-image-preview result. Easiest:
+  pass the fal CDN url directly from the character-render response.
 - **Motion prompt template (build per row):**
 
 ```
@@ -64,6 +72,15 @@ Keep environment stable. No cuts, no text, no on-screen captions.
 ```
 
 ## Cost reference (approximate, user pays)
-- nano-banana: ~$0.04 per image (5 images ≈ $0.20)
-- vidu q3 image-to-video (3s): ~$0.15 per clip (5 clips ≈ $0.75)
-- 5 characters + 5 clips ≈ $0.95 per run
+
+Per-image pricing on `fal-ai/gemini-3.1-flash-image-preview` is fixed by
+resolution:
+- 0.5K: ~$0.06
+- 1K:   ~$0.08  (our default)
+- 2K:   ~$0.12
+- 4K:   ~$0.16
+
+Vidu q3 image-to-video (3s): ~$0.15 per clip.
+
+5 characters at 1K + 5 clips ≈ **~$1.15 per run**.
+5 characters at 2K + 5 clips ≈ ~$1.35 per run.
