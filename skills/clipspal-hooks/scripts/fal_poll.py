@@ -5,7 +5,7 @@ Usage:
   PROJECT_DIR=./myproj FAL_KEY=... \\
     fal_poll.py <kind> <n>
 
-  kind = frames | clips
+  kind = characters | clips
   n    = 1..5
 
 Exit codes:
@@ -111,7 +111,7 @@ def extract_artifact_url(kind: str, result: dict) -> str:
     """fal response shapes vary by model — pluck the right url."""
     # nano-banana: {"images": [{"url": "..."}]}
     # vidu i2v:    {"video": {"url": "..."}}
-    if kind == "frames":
+    if kind == "characters":
         images = result.get("images") or []
         if images and isinstance(images, list):
             url = images[0].get("url")
@@ -131,8 +131,8 @@ def extract_artifact_url(kind: str, result: dict) -> str:
 
 
 def dest_path(project_dir: Path, kind: str, n: int) -> Path:
-    if kind == "frames":
-        return project_dir / "frames" / f"{n:02d}.png"
+    if kind == "characters":
+        return project_dir / "characters" / f"{n:02d}.png"
     if kind == "clips":
         return project_dir / "clips" / f"{n:02d}.mp4"
     raise ValueError(kind)
@@ -144,8 +144,8 @@ def main() -> int:
         return 2
     kind = sys.argv[1]
     n = int(sys.argv[2])
-    if kind not in ("frames", "clips"):
-        print(f"kind must be frames|clips, got: {kind}", file=sys.stderr)
+    if kind not in ("characters", "clips"):
+        print(f"kind must be characters|clips, got: {kind}", file=sys.stderr)
         return 2
 
     api_key = resolve_fal_key()

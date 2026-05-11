@@ -1,6 +1,6 @@
 ---
 name: clipspal-hooks
-description: Generate 5 TikTok-ready hook videos from a folder of b-roll. Builds a 5-row character matrix, renders first frames via fal-ai/nano-banana, animates them into 3s reaction clips via fal-ai/vidu/q3/image-to-video, concatenates with the user's b-roll, and burns in captions with ffmpeg. Use when the user wants TikTok hooks, AI UGC reactions, or short-form video openers for an app, product, or content niche.
+description: Generate 5 TikTok-ready hook videos from a folder of b-roll. Builds a 5-row character matrix, renders each character as a still via fal-ai/nano-banana, animates them into 3s reaction clips via fal-ai/vidu/q3/image-to-video, concatenates with the user's b-roll, and burns in captions with ffmpeg. Use when the user wants TikTok hooks, AI UGC reactions, or short-form video openers for an app, product, or content niche.
 ---
 
 # ClipsPal Hooks
@@ -31,7 +31,7 @@ clipspal.com.
 8. **MANDATORY checkpoints — wait for explicit user approval at each:**
    - After step 0 (intake) — confirm cost + folder name before any spend
    - After the matrix (step 3) — before any fal call
-   - After the frames (step 5) — before clip submission
+   - After the characters (step 5) — before clip submission
    These gates are non-skippable.
 
 ## STEP 0 — Intake + prereqs (always run first)
@@ -133,7 +133,7 @@ nonsense like "generate.20".)
 
 ```
 export PROJECT_DIR=<chosen output folder, absolute or ./relative>
-mkdir -p $PROJECT_DIR/{frames,clips,payloads,output}
+mkdir -p $PROJECT_DIR/{characters,clips,payloads,output}
 python3 ${CLAUDE_SKILL_DIR}/scripts/state.py init <slug>
 python3 ${CLAUDE_SKILL_DIR}/scripts/state.py summary
 ```
@@ -168,13 +168,14 @@ Pick 5 templates, fill in slots in audience language, write
 python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set hooks done
 ```
 
-## STEP 5 — First frames (nano-banana, 5 parallel jobs)
+## STEP 5 — Characters (nano-banana, 5 parallel jobs)
 
-Build the nano-banana prompt from each matrix row using the template in
-`${CLAUDE_SKILL_DIR}/reference/fal-endpoints.md` (which REQUIRES centered framing
-language — use it verbatim).
+Each character is a still image — the first frame Vidu will animate from
+next step. Build the nano-banana prompt from each matrix row using the
+template in `${CLAUDE_SKILL_DIR}/reference/fal-endpoints.md` (which
+REQUIRES centered framing language — use it verbatim).
 
-Write `<wd>/payloads/frame_<n>.json`:
+Write `<wd>/payloads/character_<n>.json`:
 ```json
 {
   "prompt": "<built prompt>",
@@ -187,43 +188,45 @@ Write `<wd>/payloads/frame_<n>.json`:
 Submit all 5:
 ```
 for n in 1 2 3 4 5; do
-  python3 ${CLAUDE_SKILL_DIR}/scripts/fal_submit.py frames $n fal-ai/nano-banana \
-    $PROJECT_DIR/payloads/frame_$n.json &
+  python3 ${CLAUDE_SKILL_DIR}/scripts/fal_submit.py characters $n fal-ai/nano-banana \
+    $PROJECT_DIR/payloads/character_$n.json &
 done; wait
 ```
 
 Poll all 5:
 ```
 for n in 1 2 3 4 5; do
-  python3 ${CLAUDE_SKILL_DIR}/scripts/fal_poll.py frames $n &
+  python3 ${CLAUDE_SKILL_DIR}/scripts/fal_poll.py characters $n &
 done; wait
 ```
 
-## STEP 6 — CHECKPOINT 2: frame approval (mandatory)
+## STEP 6 — CHECKPOINT 2: character approval (mandatory)
 
-Before any clip job runs, show all 5 frame PNGs (`<wd>/frames/01.png` …
-`05.png`) using the Read tool so the user can see them inline. Then ask:
+Before any clip job runs, show all 5 character PNGs
+(`<wd>/characters/01.png` … `05.png`) using the Read tool so the user
+can see them inline. Then ask:
 
-> Approve these characters? "yes" to render 3s clips (~USD 0.75), "regen N"
-> (e.g. "regen 2,4") to redo specific rows, "regen all" to redo all five.
+> Approve these characters? "yes" to animate them into 3s clips
+> (~USD 0.75), "regen N" (e.g. "regen 2,4") to redo specific characters,
+> "regen all" to redo all five.
 
 **Wait for an explicit answer.** Do not submit clip jobs until approval.
 
 On "regen N":
 ```
-python3 ${CLAUDE_SKILL_DIR}/scripts/state.py reset frames 2,4
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py reset characters 2,4
 ```
 …then update those matrix rows per user feedback, re-submit those slots,
 re-poll, re-checkpoint.
 
 ## STEP 7 — Hook clips (Vidu q3 i2v, 5 parallel jobs)
 
-Get each frame's fal CDN URL:
+Get each character's fal CDN URL:
 ```python
 import json, urllib.request, os
 state = json.load(open(os.environ["PROJECT_DIR"] + "/state.json"))
 key = open(os.path.expanduser("~/.clipspal/fal_key")).read().strip() if not os.environ.get("FAL_KEY") else os.environ["FAL_KEY"]
-for slot in state["frames"]:
+for slot in state["characters"]:
     rid = slot["request_id"]
     req = urllib.request.Request(
         f"https://queue.fal.run/fal-ai/nano-banana/requests/{rid}",
@@ -234,7 +237,7 @@ for slot in state["frames"]:
 Write `<wd>/payloads/clip_<n>.json`:
 ```json
 {
-  "image_url": "<frame n fal cdn url>",
+  "image_url": "<character n fal CDN url from previous step>",
   "prompt": "<motion prompt from matrix row via reference/fal-endpoints.md>",
   "duration": 3
 }

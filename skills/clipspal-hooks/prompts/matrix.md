@@ -1,8 +1,9 @@
 # Character Matrix Generator
 
 You are generating a 5-row character matrix for AI-generated TikTok reaction
-hook clips. Each row drives one nano-banana first-frame image, which is then
-animated into a ~3 second reaction clip via Vidu i2v.
+hook clips. Each row drives one nano-banana character still — that still
+is the first frame Vidu animates from in the next step (~3s reaction
+clip via Vidu i2v).
 
 The goal is **diversity that feels native to TikTok**: different demographics,
 settings, lighting, emotions, and framing across the 5 rows. The viewer should

@@ -11,9 +11,9 @@ in Claude Code.
 1. You describe your project and point at a folder of your existing b-roll.
 2. The skill generates a 5-row character matrix (different demographics,
    settings, reactions) tailored to your audience.
-3. Each row becomes a centered, photorealistic UGC first frame via
-   `fal-ai/nano-banana`.
-4. Each frame is animated into a 3-second reaction clip via
+3. Each row is rendered as a centered, photorealistic UGC character
+   (a still image) via `fal-ai/nano-banana`.
+4. Each character is animated into a 3-second reaction clip via
    `fal-ai/vidu/q3/image-to-video`.
 5. Five hook lines are picked from a curated library and tailored to your
    project.
@@ -98,8 +98,8 @@ The skill will:
    `<broll_folder>/clipspal-hooks-output/` so they land next to your
    source clips — you can override if you want them elsewhere.
 4. Generate a character matrix and **wait for your approval**.
-5. Render 5 first frames and **wait for your approval again** before
-   spending the bigger fal credits on Vidu.
+5. Render 5 characters (still images) and **wait for your approval
+   again** before spending the bigger fal credits on Vidu.
 6. Render the clips, assemble the videos, and open the output folder.
 
 If you Ctrl-C mid-run, just re-run the same command from the same folder —

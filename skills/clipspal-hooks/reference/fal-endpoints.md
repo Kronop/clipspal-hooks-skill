@@ -10,8 +10,9 @@ Queue API:
 
 ## Models
 
-### `fal-ai/nano-banana` — first-frame image
-Used for: hook character first frame (the still image Vidu animates from).
+### `fal-ai/nano-banana` — character still
+Used for: rendering each character matrix row into a still image. This
+still is the first frame Vidu will animate from in the next step.
 
 Input payload (write to `params.json` and pass to `fal_submit.py`):
 
@@ -38,13 +39,13 @@ right edge; do not crop half of the face.
 ```
 
 ### `fal-ai/vidu/q3/image-to-video` — 3s hook clip
-Used for: animating the first frame into a reaction clip.
+Used for: animating each character still into a 3s reaction clip.
 
 Input payload:
 
 ```json
 {
-  "image_url": "<data uri or signed url to the frame from nano-banana>",
+  "image_url": "<data uri or signed url to the character still from nano-banana>",
   "prompt": "<motion description from the matrix row>",
   "duration": 3
 }
@@ -65,4 +66,4 @@ Keep environment stable. No cuts, no text, no on-screen captions.
 ## Cost reference (approximate, user pays)
 - nano-banana: ~$0.04 per image (5 images ≈ $0.20)
 - vidu q3 image-to-video (3s): ~$0.15 per clip (5 clips ≈ $0.75)
-- 5 frames + 5 clips ≈ $0.95 per run
+- 5 characters + 5 clips ≈ $0.95 per run

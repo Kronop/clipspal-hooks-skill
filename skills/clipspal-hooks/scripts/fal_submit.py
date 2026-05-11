@@ -6,7 +6,7 @@ Usage:
     fal_submit.py <kind> <n> <model_id> <params_json_file>
 
 Where:
-  kind        = frames | clips
+  kind        = characters | clips
   n           = 1..5 (slot number)
   model_id    = e.g. "fal-ai/nano-banana" or "fal-ai/vidu/q3/image-to-video"
   params_json = path to a JSON file containing the input payload
@@ -84,8 +84,8 @@ def main() -> int:
     model_id = sys.argv[3]
     params_file = Path(sys.argv[4])
 
-    if kind not in ("frames", "clips"):
-        print(f"kind must be frames|clips, got: {kind}", file=sys.stderr)
+    if kind not in ("characters", "clips"):
+        print(f"kind must be characters|clips, got: {kind}", file=sys.stderr)
         return 2
 
     api_key = resolve_fal_key()

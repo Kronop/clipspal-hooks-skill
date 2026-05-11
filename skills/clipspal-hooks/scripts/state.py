@@ -7,7 +7,7 @@ state.json shape:
   "created_at": "...",
   "matrix": "done|idle",
   "hooks": "done|idle",
-  "frames": [{"n": 1, "status": "idle|pending|done|failed", "request_id": "...", "path": "..."}],
+  "characters": [{"n": 1, "status": "idle|pending|done|failed", "request_id": "...", "path": "..."}],
   "clips":  [{"n": 1, "status": "idle|pending|done|failed", "request_id": "...", "path": "..."}],
   "assembly": [{"n": 1, "status": "idle|done", "path": "..."}]
 }
@@ -50,7 +50,7 @@ def empty_state(project: str = "") -> dict:
         "updated_at": utc_now(),
         "matrix": "idle",
         "hooks": "idle",
-        "frames": [{"n": i + 1, "status": "idle"} for i in range(SLOT_COUNT)],
+        "characters": [{"n": i + 1, "status": "idle"} for i in range(SLOT_COUNT)],
         "clips": [{"n": i + 1, "status": "idle"} for i in range(SLOT_COUNT)],
         "assembly": "idle",
     }
@@ -98,7 +98,7 @@ def locked(project_dir: Path):
 
 
 def get_slot(state: dict, kind: str, n: int) -> dict:
-    if kind not in ("frames", "clips"):
+    if kind not in ("characters", "clips"):
         raise ValueError(f"unknown slot kind: {kind}")
     for slot in state[kind]:
         if slot["n"] == n:
@@ -128,7 +128,7 @@ def cmd_summary(project_dir: Path) -> None:
     """One-line status summary for Claude to read before each step."""
     s = read_state(project_dir)
     parts = [f"matrix={s.get('matrix')}", f"hooks={s.get('hooks')}"]
-    for kind in ("frames", "clips"):
+    for kind in ("characters", "clips"):
         statuses = [slot["status"] for slot in s.get(kind, [])]
         done = sum(1 for x in statuses if x == "done")
         pending = sum(1 for x in statuses if x == "pending")
@@ -150,11 +150,11 @@ def cmd_reset(project_dir: Path, kind: str, n_spec: str) -> None:
     them. `n_spec` is a comma-separated list of 1-based slot numbers, or
     "all" to reset every slot of that kind.
 
-    Use this for re-rolls: after the user rejects frame 2 and 4 at the
-    checkpoint, run `state.py reset frames 2,4` then re-submit those slots.
+    Use this for re-rolls: after the user rejects character 2 and 4 at
+    the checkpoint, run `state.py reset characters 2,4` then re-submit.
     """
-    if kind not in ("frames", "clips"):
-        raise ValueError(f"reset only supports frames|clips, got: {kind}")
+    if kind not in ("characters", "clips"):
+        raise ValueError(f"reset only supports characters|clips, got: {kind}")
     with locked(project_dir) as s:
         if n_spec.strip() == "all":
             targets = [slot["n"] for slot in s[kind]]
