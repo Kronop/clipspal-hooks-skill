@@ -1,0 +1,32 @@
+{
+  "name": "clipspal-marketplace",
+  "description": "Free Claude Code skills from ClipsPal — start with clipspal-hooks.",
+  "owner": {
+    "name": "ClipsPal",
+    "url": "https://clipspal.com"
+  },
+  "plugins": [
+    {
+      "name": "clipspal-hooks",
+      "description": "Drop in your b-roll, describe what you do, get 5 TikTok-ready videos with AI hook clips + burned-in captions. Runs locally, you bring a fal.ai key.",
+      "version": "0.1.0",
+      "author": {
+        "name": "ClipsPal",
+        "url": "https://clipspal.com"
+      },
+      "source": {
+        "source": "git-repo",
+        "url": "https://github.com/Kronop/clipspal-hooks-skill.git"
+      },
+      "homepage": "https://github.com/Kronop/clipspal-hooks-skill",
+      "keywords": [
+        "tiktok",
+        "video",
+        "ugc",
+        "fal-ai",
+        "hooks",
+        "broll"
+      ]
+    }
+  ]
+}

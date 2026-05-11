@@ -34,7 +34,14 @@ run costs your fal account roughly:
 
 ## Install
 
-Clone into your Claude Code skills folder:
+In Claude Code:
+
+```
+/plugin marketplace add Kronop/clipspal-hooks-skill
+/plugin install clipspal-hooks
+```
+
+Or clone manually:
 
 ```bash
 git clone https://github.com/Kronop/clipspal-hooks-skill \
