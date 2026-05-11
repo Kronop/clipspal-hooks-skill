@@ -49,38 +49,75 @@ right edge; do not crop half of the face.
 ### `fal-ai/vidu/q3/image-to-video` — 3s hook clip
 Used for: animating each character still into a 3s reaction clip.
 
+Same endpoint, payload shape, and prompt structure the prod ClipsPal
+free-tool pipeline (`scripts/gen-free-hook-video.mjs`) uses — keep this
+file in sync if prod changes.
+
 Input payload:
 
 ```json
 {
   "image_url": "<data uri or signed url to the character still>",
-  "prompt": "<motion description from the matrix row>",
-  "duration": 3
+  "prompt": "<motion description, see template below>",
+  "duration": 3,
+  "resolution": "720p",
+  "audio": false
 }
 ```
 
 Notes:
 - Duration is an integer in seconds. We always pass `3`.
+- `resolution` options: `360p | 540p | 720p | 1080p`. Prod uses `720p`.
+  Drop to `540p` to halve the per-second cost (see Cost section).
+- `audio: false` — Vidu i2v is silent natively; we set it explicit so
+  there's no ambiguity downstream in `assemble.sh`.
 - `image_url` can be a `data:image/png;base64,...` URI or the fal CDN
   url returned by the gemini-3.1-flash-image-preview result. Easiest:
   pass the fal CDN url directly from the character-render response.
-- **Motion prompt template (build per row):**
+
+**Motion prompt template (build per row — mirrors prod's 4-part
+structure for visual consistency with the prod free tool):**
 
 ```
-{emotion}. Camera: {camera_move}. Subject reaction lands within 2 seconds.
-Keep environment stable. No cuts, no text, no on-screen captions.
+Character action: Starting from the exact pose in the first frame
+({first_frame_pose}), the character {emotion}. The motion should feel
+naturalistic and complete its arc within 3 seconds, peaking around the
+midpoint and settling at the end. The character's identity, clothing,
+hair, and the surrounding room must remain perfectly consistent with
+the first frame — only the described motion changes.
+
+Camera movement: {camera_move}. Smooth and steady, no shake.
+
+Animation beyond character: Subtle ambient life — slight breathing
+rhythm in the chest, faint shifting of light or air in the room.
+Otherwise the environment is still.
+
+Constraints: No text, captions, subtitles, watermarks, or written
+words anywhere in the video. No new characters or objects appear. No
+cuts. No transitions. Photorealistic; lighting, color, and identity
+continuous with the first frame.
 ```
 
 ## Cost reference (approximate, user pays)
 
-Per-image pricing on `fal-ai/gemini-3.1-flash-image-preview` is fixed by
+Per-image on `fal-ai/gemini-3.1-flash-image-preview` is fixed by
 resolution:
 - 0.5K: ~$0.06
-- 1K:   ~$0.08  (our default)
+- 1K:   ~$0.08  (our default — matches prod)
 - 2K:   ~$0.12
 - 4K:   ~$0.16
 
-Vidu q3 image-to-video (3s): ~$0.15 per clip.
+Per-second on `fal-ai/vidu/q3/image-to-video`:
+- 360p / 540p: ~$0.07/sec → 3s ≈ $0.21
+- 720p:        ~$0.154/sec → 3s ≈ $0.46  (our default — matches prod)
+- 1080p:       ~$0.154/sec → 3s ≈ $0.46
 
-5 characters at 1K + 5 clips ≈ **~$1.15 per run**.
-5 characters at 2K + 5 clips ≈ ~$1.35 per run.
+Per-run totals (5 characters + 5 clips):
+- 1K char + 540p clip: 5×$0.08 + 5×$0.21 = **~$1.45 per run**  (budget mode)
+- 1K char + 720p clip: 5×$0.08 + 5×$0.46 = **~$2.70 per run**  (default, matches prod)
+- 2K char + 720p clip: 5×$0.12 + 5×$0.46 ≈ **~$2.90 per run**  (max quality)
+
+Note: prior versions of this skill quoted ~$0.95 for the run — that
+was wrong on both axes (used the older nano-banana model and a stale
+Vidu per-clip price). Real cost is closer to ~$2.70 at the prod-match
+defaults.

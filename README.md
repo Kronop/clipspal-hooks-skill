@@ -33,8 +33,11 @@ You bring your own [fal.ai API key](https://fal.ai/dashboard/keys). One
 run costs your fal account roughly:
 
 - 5 Gemini 3.1 Flash Image character stills at 1K: ~$0.40
-- 5 Vidu 3-second clips: ~$0.75
-- **Total: ~$1.15** (bump character resolution to 2K for ~$1.35)
+- 5 Vidu 3-second clips at 720p: ~$2.30
+- **Total: ~$2.70** at the prod-match defaults
+
+Drop the Vidu resolution to 540p (still ~9:16 vertical, slightly
+softer) for ~$1.45 total.
 
 ## Install
 

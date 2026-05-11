@@ -119,9 +119,10 @@ Before generating, print:
 
 > This run will use your fal.ai credits:
 >   - 5 Gemini 3.1 Flash Image character stills at 1K (~USD 0.40)
->   - 5 Vidu 3s reaction clips (~USD 0.75)
->   - Total: ~USD 1.15
-> Reply "yes" to proceed.
+>   - 5 Vidu 3s reaction clips at 720p (~USD 2.30)
+>   - Total: ~USD 2.70
+> Reply "yes" to proceed. (Reply "yes 540p" to drop clips to 540p
+> ≈ USD 1.45 total — slightly softer but half the spend.)
 
 (Use "USD 0.XX" instead of "$0.XX" — bare `$0` gets substituted with the
 slash-command's first arg when the runbook is rendered, producing
@@ -207,9 +208,9 @@ Before any clip job runs, show all 5 character PNGs
 (`<wd>/characters/01.png` … `05.png`) using the Read tool so the user
 can see them inline. Then ask:
 
-> Approve these characters? "yes" to animate them into 3s clips
-> (~USD 0.75), "regen N" (e.g. "regen 2,4") to redo specific characters,
-> "regen all" to redo all five.
+> Approve these characters? "yes" to animate them into 3s 720p clips
+> (~USD 2.30 for all 5), "regen N" (e.g. "regen 2,4") to redo specific
+> characters, "regen all" to redo all five.
 
 **Wait for an explicit answer.** Do not submit clip jobs until approval.
 
@@ -242,9 +243,17 @@ Write `<wd>/payloads/clip_<n>.json`:
 {
   "image_url": "<character n fal CDN url from previous step>",
   "prompt": "<motion prompt from matrix row via reference/fal-endpoints.md>",
-  "duration": 3
+  "duration": 3,
+  "resolution": "720p",
+  "audio": false
 }
 ```
+
+The motion prompt is the **4-part structured prompt** in
+`reference/fal-endpoints.md` — build it verbatim from each matrix row.
+Do NOT use a one-liner like "{emotion}. Camera: {camera_move}." — that
+was the old shape, prod has moved to the longer template for
+shot-to-shot consistency.
 
 Submit + poll with `kind=clips`, `model_id=fal-ai/vidu/q3/image-to-video`.
 
