@@ -1,5 +1,5 @@
 {
-  "_comment": "Drop this into .claude/settings.local.json (or merge with existing) inside the folder where you run the clipspal-hooks skill. It allowlists the exact commands the skill issues so you stop seeing permission prompts mid-run. Covers plugin install (~/.claude/plugins/cache/clipspal-marketplace/clipspal-hooks/<version>/...) and manual install (~/.claude/skills/generate/).",
+  "_comment": "Suggested allowlist for the clipspal-hooks skill. To install: from your project root, run `! python3 ${CLAUDE_SKILL_DIR}/scripts/install_permissions.py` (the leading `!` runs it in your own shell, bypassing the auto-mode classifier that blocks Claude from editing permission files). The installer merges these patterns into .claude/settings.local.json without clobbering existing entries. Covers plugin install (~/.claude/plugins/cache/clipspal-marketplace/clipspal-hooks/<version>/...) and manual install (~/.claude/skills/generate/).",
   "permissions": {
     "allow": [
       "Bash(python3 ~/.claude/plugins/cache/clipspal-marketplace/clipspal-hooks/*/skills/generate/scripts/*:*)",

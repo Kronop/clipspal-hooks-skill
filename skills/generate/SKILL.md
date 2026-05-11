@@ -1,6 +1,6 @@
 ---
 name: generate
-description: Generate 30 TikTok-ready hook videos from a folder of b-roll — a month of daily posts from a single run. Builds a 5-row character matrix, renders each character as a still via fal-ai/gemini-3.1-flash-image-preview, animates them into 3s reaction clips via fal-ai/vidu/q3/image-to-video, picks 30 hook lines from a 500-template library, pairs each of the 5 clips with 6 hooks via round-robin, concatenates with the user's b-roll, and burns in captions with ffmpeg. Use when the user wants TikTok hooks, AI UGC reactions, or short-form video openers for an app, product, or content niche.
+description: Generate 30 TikTok-ready hook videos from a folder of b-roll — a month of daily posts from a single run. Builds a 5-row character matrix, renders each character as a still via fal-ai/gemini-3.1-flash-image-preview, animates them into 3s reaction clips via fal-ai/vidu/q3/image-to-video, picks 30 hook lines from an 820-template app-promo library, pairs each of the 5 clips with 6 hooks via round-robin, concatenates with the user's b-roll, and burns in captions with ffmpeg. Use when the user wants TikTok hooks, AI UGC reactions, or short-form video openers for an app, product, or content niche.
 ---
 
 # ClipsPal Hooks
@@ -44,17 +44,35 @@ in one block.
 ### 0a. Offer the permission allowlist (one-time)
 
 Before you run any `bash` or `python3` commands, tell the user this skill
-will run several scripts and they'll see a permission prompt for each one
-unless they pre-allowlist them. Offer:
+will trigger several permission prompts unless they pre-allowlist its
+scripts. **Do not try to edit `.claude/settings.local.json` yourself** —
+Claude Code's auto-mode classifier blocks edits to that file as an
+anti-prompt-injection safeguard, even when the user approves. The user
+must run the merge themselves. Offer this exact choice, verbatim:
 
-> I can drop a ready-made allowlist into `.claude/settings.local.json` so
-> you don't have to approve every command. Want me to?
+> This skill runs ~5 different `bash`/`python3` commands. You'll see a
+> permission prompt for each unless you pre-allowlist them. Two options:
+>
+> **A)** Paste this one line and hit enter — it merges the allowlist
+> into `.claude/settings.local.json` (idempotent, preserves existing
+> entries):
+>
+> ```
+> ! python3 ${CLAUDE_SKILL_DIR}/scripts/install_permissions.py
+> ```
+>
+> **B)** Skip — just approve each prompt as it comes (≈5 clicks total).
+>
+> Reply "A", "B", or "skip".
 
-If yes: read `${CLAUDE_SKILL_DIR}/reference/permissions-suggested.json` and
-merge its `permissions.allow` entries into the user's
-`<cwd>/.claude/settings.local.json` (creating the file if needed). Do this
-once per project. If the user says no, just proceed and let them approve
-prompts case by case.
+If the user picks A and runs it: the script prints `ok: <path>` and a
+count of patterns added. Continue.
+If the user picks B or skip: continue, and let them approve prompts
+case by case.
+
+Do NOT attempt to invoke `install_permissions.py` via the Bash tool
+yourself — the user must run it via the `!` prefix so it executes in
+their own shell, bypassing the classifier.
 
 ### 0b. Verify prerequisites
 
@@ -166,9 +184,11 @@ row N", "regen 2,4", "regen all" → rewrite those rows and re-checkpoint.
 ## STEP 4 — Hooks (you, no API)
 
 Read `${CLAUDE_SKILL_DIR}/prompts/hooks.md` and `${CLAUDE_SKILL_DIR}/reference/hook-library.json`.
-Pick **30 distinct templates** (the library has 500+), fill in slots in
-audience language, write `<wd>/hooks.json` as a 30-entry array with `n`,
-`text`, and `template_id`. Then:
+Pick **30 distinct templates** (the library has 820 app-promo hooks
+across 11 metas), fill in slots in audience language — including swapping
+the literal noun **"app"** for the user's actual product noun — and write
+`<wd>/hooks.json` as a 30-entry array with `n`, `text`, and `template_id`.
+Then:
 ```
 python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set hooks done
 ```
@@ -313,6 +333,10 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/fal_poll.py clips 3
 ```
 
 ### Permission prompt fatigue
-Mention to the user: copy `${CLAUDE_SKILL_DIR}/reference/permissions-suggested.json`
-into `<their cwd>/.claude/settings.local.json` to allowlist the exact
-commands this skill runs.
+Tell the user to run the allowlist installer themselves (Claude can't —
+classifier blocks self-modification of permissions):
+```
+! python3 ${CLAUDE_SKILL_DIR}/scripts/install_permissions.py
+```
+This merges the bundled allowlist into `<cwd>/.claude/settings.local.json`,
+preserving existing entries. Idempotent.

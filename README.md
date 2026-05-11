@@ -18,11 +18,11 @@ single ~$2.70 run. No signup, no watermark, runs locally in Claude Code.
 4. Each character is animated into a 3-second reaction clip via
    `fal-ai/vidu/q3/image-to-video`. **5 clips total** — that's the
    expensive part, and we only spend on it once per run.
-5. **30 hook lines** are picked from a curated 500-template library and
-   tailored to your project.
+5. **30 hook lines** are picked from a curated 820-template app-promo
+   library and tailored to your product.
 6. Local `ffmpeg` pairs each of the 5 character clips with 6 different
    hook lines + round-robin b-roll, then burns in the captions (TikTok
-   Sans Bold + Apple color emoji, same renderer as the prod free tool).
+   Sans Bold + Apple color emoji).
 
 Output: 30 ready-to-post 1080×1920 mp4s in
 `<broll_folder>/clipspal-hooks-output/output/` — co-located with the

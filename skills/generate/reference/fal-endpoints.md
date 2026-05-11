@@ -75,8 +75,8 @@ Notes:
   url returned by the gemini-3.1-flash-image-preview result. Easiest:
   pass the fal CDN url directly from the character-render response.
 
-**Motion prompt template (build per row — mirrors prod's 4-part
-structure for visual consistency with the prod free tool):**
+**Motion prompt template (build per row — 4-part structure for shot-to-shot
+visual consistency across the 5 characters):**
 
 ```
 Character action: Starting from the exact pose in the first frame
