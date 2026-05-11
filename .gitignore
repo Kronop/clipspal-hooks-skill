@@ -1,0 +1,13 @@
+# Apple emoji PNGs are fetched at runtime and cached on the user's machine.
+# Do not commit them.
+fonts/.emoji-cache/
+
+# Per-project state belongs to the user, not the skill repo.
+state.json
+state.json.lock
+
+# OS / editor noise
+.DS_Store
+*.swp
+.idea/
+.vscode/

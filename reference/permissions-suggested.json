@@ -1,0 +1,14 @@
+{
+  "_comment": "Drop this into .claude/settings.local.json (or merge with existing) inside the folder where you run the clipspal-hooks skill. It allowlists the exact commands the skill issues so you stop seeing permission prompts mid-run.",
+  "permissions": {
+    "allow": [
+      "Bash(python3 ~/.claude/skills/clipspal-hooks/scripts/*:*)",
+      "Bash(bash ~/.claude/skills/clipspal-hooks/scripts/*:*)",
+      "Bash(ffmpeg:*)",
+      "Bash(ffprobe:*)",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "Bash(open:*)"
+    ]
+  }
+}
