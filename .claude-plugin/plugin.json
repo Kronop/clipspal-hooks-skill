@@ -1,0 +1,19 @@
+{
+  "name": "clipspal-hooks",
+  "version": "0.1.0",
+  "description": "Drop in your b-roll, get 5 TikTok-ready videos with AI hook clips + burned-in captions. Runs locally, you bring a fal.ai key.",
+  "author": {
+    "name": "ClipsPal",
+    "url": "https://clipspal.com"
+  },
+  "homepage": "https://github.com/Kronop/clipspal-hooks-skill",
+  "license": "MIT",
+  "keywords": [
+    "tiktok",
+    "video",
+    "ugc",
+    "fal-ai",
+    "hooks",
+    "broll"
+  ]
+}

@@ -38,21 +38,21 @@ In Claude Code:
 
 ```
 /plugin marketplace add Kronop/clipspal-hooks-skill
-/plugin install clipspal-hooks
+/plugin install clipspal-hooks@clipspal-marketplace
 ```
 
-Or clone manually:
+Or clone the skill directly (no plugin manager):
 
 ```bash
-git clone https://github.com/Kronop/clipspal-hooks-skill \
-  ~/.claude/skills/clipspal-hooks
+git clone https://github.com/Kronop/clipspal-hooks-skill /tmp/clipspal-hooks-skill
+cp -R /tmp/clipspal-hooks-skill/skills/clipspal-hooks ~/.claude/skills/clipspal-hooks
 ```
 
 Then make sure you have the dependencies:
 
 ```bash
 # macOS
-brew install ffmpeg-full && brew unlink ffmpeg && brew link --overwrite ffmpeg-full
+brew install ffmpeg
 python3 -m pip install --user Pillow
 
 # Linux
@@ -67,10 +67,14 @@ anything is missing.)
 Open Claude Code in any folder that contains your b-roll, then say:
 
 ```
-/clipspal-hooks make tiktok hooks for my protein tracker app
+make tiktok hooks for my protein tracker app
 ```
 
-…or describe it in plain English. The skill will:
+…or any natural-language equivalent. Claude will load the skill on its own
+from the description. (Plugin install also exposes the namespaced command
+`/clipspal-hooks:clipspal-hooks` if you prefer to invoke it explicitly.)
+
+The skill will:
 
 1. Verify your prerequisites.
 2. Ask for your fal.ai API key (once — persists to `~/.clipspal/fal_key`).
@@ -86,33 +90,39 @@ the skill picks up exactly where it left off.
 
 ## Tune the look
 
-- Want a different hook text style? Edit `scripts/render_overlay.py`
-  (font size, color, stroke, position) — same parameters as the prod
-  Lambda renderer.
-- Want different reaction archetypes? Edit `prompts/matrix.md`.
-- Want different hook templates? Edit `reference/hook-library.json`
-  (curated copy of the prod hook library).
+- Want a different hook text style? Edit
+  `skills/clipspal-hooks/scripts/render_overlay.py` (font size, color,
+  stroke, position) — same parameters as the prod Lambda renderer.
+- Want different reaction archetypes? Edit
+  `skills/clipspal-hooks/prompts/matrix.md`.
+- Want different hook templates? Edit
+  `skills/clipspal-hooks/reference/hook-library.json` (curated copy of
+  the prod hook library).
 
 ## What's inside
 
 ```
-clipspal-hooks/
-├── SKILL.md                 # The runbook Claude Code follows.
-├── prompts/                 # Prose prompts: matrix + hook selection.
-├── scripts/
-│   ├── state.py             # state.json + flock — dedupe engine.
-│   ├── fal_submit.py        # Submit one fal job per slot, atomic.
-│   ├── fal_poll.py          # Poll + download artifact, idempotent.
-│   ├── render_overlay.py    # TikTok Sans + Apple color emoji PNG renderer.
-│   ├── assemble.sh          # ffmpeg concat + overlay.
-│   ├── check_prereqs.sh
-│   ├── check_broll.sh
-│   └── fal_key.sh
-├── fonts/                   # TikTok Sans Bold + Noto fallbacks.
-└── reference/
-    ├── fal-endpoints.md
-    ├── hook-library.json    # The prod hook library.
-    └── permissions-suggested.json
+clipspal-hooks-skill/
+├── .claude-plugin/
+│   ├── plugin.json          # Plugin manifest (for /plugin install).
+│   └── marketplace.json     # Marketplace entry (for /plugin marketplace add).
+└── skills/clipspal-hooks/
+    ├── SKILL.md             # The runbook Claude Code follows.
+    ├── prompts/             # Prose prompts: matrix + hook selection.
+    ├── scripts/
+    │   ├── state.py         # state.json + flock — dedupe engine.
+    │   ├── fal_submit.py    # Submit one fal job per slot, atomic.
+    │   ├── fal_poll.py      # Poll + download artifact, idempotent.
+    │   ├── render_overlay.py# TikTok Sans + Apple color emoji PNG renderer.
+    │   ├── assemble.sh      # ffmpeg concat + overlay.
+    │   ├── check_prereqs.sh
+    │   ├── check_broll.sh
+    │   └── fal_key.sh
+    ├── fonts/               # TikTok Sans Bold + Noto fallbacks.
+    └── reference/
+        ├── fal-endpoints.md
+        ├── hook-library.json# The prod hook library.
+        └── permissions-suggested.json
 ```
 
 ## License

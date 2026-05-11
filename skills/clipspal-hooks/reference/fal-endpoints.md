@@ -63,6 +63,6 @@ Keep environment stable. No cuts, no text, no on-screen captions.
 ```
 
 ## Cost reference (approximate, user pays)
-- nano-banana: ~$0.04 per image
-- vidu q3 image-to-video (3s): ~$0.10-0.15 per clip
-- 5 frames + 5 clips ≈ $0.70-1.00 per run
+- nano-banana: ~$0.04 per image (5 images ≈ $0.20)
+- vidu q3 image-to-video (3s): ~$0.15 per clip (5 clips ≈ $0.75)
+- 5 frames + 5 clips ≈ $0.95 per run

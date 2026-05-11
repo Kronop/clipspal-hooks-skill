@@ -20,11 +20,19 @@ from __future__ import annotations
 import json
 import os
 import sys
-import fcntl
 import tempfile
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+
+try:
+    import fcntl  # POSIX only
+    _HAS_FCNTL = True
+except ImportError:
+    # Windows: degrade to no-locking. Concurrent fal_submit/fal_poll calls
+    # in the same project dir could race, but the skill drives them
+    # serially per slot so collisions are unlikely.
+    _HAS_FCNTL = False
 
 STATE_FILE = "state.json"
 LOCK_FILE = "state.json.lock"
@@ -72,7 +80,8 @@ def locked(project_dir: Path):
     lock = lock_path(project_dir)
     lock.touch(exist_ok=True)
     with open(lock, "r+") as lf:
-        fcntl.flock(lf.fileno(), fcntl.LOCK_EX)
+        if _HAS_FCNTL:
+            fcntl.flock(lf.fileno(), fcntl.LOCK_EX)
         try:
             state = read_state(project_dir)
             yield state
@@ -84,7 +93,8 @@ def locked(project_dir: Path):
                 tmp_name = tmp.name
             os.replace(tmp_name, sp)
         finally:
-            fcntl.flock(lf.fileno(), fcntl.LOCK_UN)
+            if _HAS_FCNTL:
+                fcntl.flock(lf.fileno(), fcntl.LOCK_UN)
 
 
 def get_slot(state: dict, kind: str, n: int) -> dict:
@@ -161,7 +171,7 @@ def cmd_reset(project_dir: Path, kind: str, n_spec: str) -> None:
 
 def main() -> int:
     if len(sys.argv) < 2:
-        print("usage: state.py <init|show|summary|set> [args...]", file=sys.stderr)
+        print("usage: state.py <init|show|summary|set|reset> [args...]", file=sys.stderr)
         return 2
     cmd = sys.argv[1]
     pd = Path(os.environ.get("PROJECT_DIR", "."))

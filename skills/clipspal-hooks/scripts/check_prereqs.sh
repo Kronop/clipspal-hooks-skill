@@ -42,13 +42,15 @@ check "python3 has Pillow" \
 
 check "ffmpeg" \
   "command -v ffmpeg" \
-  "brew install ffmpeg-full   # macOS  (or apt install ffmpeg on Linux)"
+  "brew install ffmpeg   # macOS  (or apt install ffmpeg on Linux)"
 
-# drawtext requires libfreetype. Slim homebrew ffmpeg ships without it.
+# We render the caption to a transparent PNG via render_overlay.py and
+# composite with ffmpeg's `overlay` filter — both ship in the stock ffmpeg
+# build. No need for ffmpeg-full / drawtext.
 FFMPEG_FILTERS="$(ffmpeg -hide_banner -filters 2>/dev/null || true)"
-check "ffmpeg has drawtext filter" \
-  "grep -qw drawtext <<<\"\$FFMPEG_FILTERS\"" \
-  "brew install ffmpeg-full && brew unlink ffmpeg && brew link --overwrite ffmpeg-full"
+check "ffmpeg has overlay filter" \
+  "grep -qw overlay <<<\"\$FFMPEG_FILTERS\"" \
+  "reinstall ffmpeg from your package manager — overlay ships with the stock build"
 
 check "ffprobe" \
   "command -v ffprobe" \

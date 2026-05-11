@@ -28,8 +28,11 @@ from PIL import Image, ImageDraw, ImageFont
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 FONTS_DIR = SKILL_DIR / "fonts"
-EMOJI_CACHE_DIR = Path(os.environ.get("CLIPSPAL_EMOJI_CACHE", str(SKILL_DIR / "fonts" / ".emoji-cache")))
-EMOJI_CDN = "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@latest/img/apple/64"
+EMOJI_CACHE_DIR = Path(os.environ.get(
+    "CLIPSPAL_EMOJI_CACHE",
+    str(Path.home() / ".cache" / "clipspal" / "emoji"),
+))
+EMOJI_CDN = "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@15.1.2/img/apple/64"
 
 # Same Unicode ranges the prod Multilingual loader keys on (multilingual-fonts.js)
 FALLBACK_FONTS = [
@@ -228,7 +231,21 @@ def render(
                 if img is not None:
                     # Vertically center the emoji glyph on the text baseline
                     canvas.alpha_composite(img, (x, y + (line_height - em_size) // 2))
-                x += w
+                    x += w
+                else:
+                    # Fall back to text rendering so the user doesn't see a
+                    # silent gap when the apple-emoji CDN has no asset for
+                    # this codepoint (e.g. U+2605 BLACK STAR).
+                    draw.text(
+                        (x, y),
+                        val,
+                        font=font,
+                        fill=fill_color,
+                        stroke_width=stroke_w,
+                        stroke_fill=(0, 0, 0, 255),
+                    )
+                    bbox = draw.textbbox((0, 0), val, font=font)
+                    x += bbox[2] - bbox[0]
             else:
                 draw.text(
                     (x, y),

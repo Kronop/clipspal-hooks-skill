@@ -92,7 +92,7 @@ def main() -> int:
     if not api_key:
         print(
             "FAL_KEY not set and ~/.clipspal/fal_key does not exist. "
-            "Run: bash $SKILL/scripts/fal_key.sh save <key>",
+            "Run: bash ${CLAUDE_SKILL_DIR}/scripts/fal_key.sh save <key>",
             file=sys.stderr,
         )
         return 2

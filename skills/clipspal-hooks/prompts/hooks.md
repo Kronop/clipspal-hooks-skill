@@ -52,5 +52,5 @@ hook patterns from scratch** — read the bundled library at
 ## After writing
 
 ```
-PROJECT_DIR=<project> python3 $SKILL/scripts/state.py set hooks done
+PROJECT_DIR=<project> python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set hooks done
 ```

@@ -1,6 +1,6 @@
 ---
 name: clipspal-hooks
-description: Drop in your b-roll, describe what you do, get 5 TikTok-ready videos with AI hook clips + burned-in captions. A free Claude Code skill from ClipsPal. Trigger with "/clipspal-hooks", "make tiktok hooks", "generate hook videos for X", or "clipspal hooks for my [project]".
+description: Generate 5 TikTok-ready hook videos from a folder of b-roll. Builds a 5-row character matrix, renders first frames via fal-ai/nano-banana, animates them into 3s reaction clips via fal-ai/vidu/q3/image-to-video, concatenates with the user's b-roll, and burns in captions with ffmpeg. Use when the user wants TikTok hooks, AI UGC reactions, or short-form video openers for an app, product, or content niche.
 ---
 
 # ClipsPal Hooks
@@ -18,7 +18,7 @@ clipspal.com.
    `scripts/fal_poll.py` for every fal interaction. They are the only
    writers to `state.json` — this is what prevents resubmitting jobs.
 2. **Before every step, read state.**
-   `PROJECT_DIR=<dir> python3 $SKILL/scripts/state.py summary`.
+   `PROJECT_DIR=<dir> python3 ${CLAUDE_SKILL_DIR}/scripts/state.py summary`.
    Skip steps already `done`. Never regenerate a `done` artifact unless
    the user explicitly asks.
 3. **If a slot's status is `pending`, poll it. Do not resubmit.**
@@ -40,23 +40,38 @@ You must do all of the following before generating anything. Run the checks
 **before** asking the user for inputs you can derive — but ask for the rest
 in one block.
 
-### 0a. Verify prerequisites
+### 0a. Offer the permission allowlist (one-time)
+
+Before you run any `bash` or `python3` commands, tell the user this skill
+will run several scripts and they'll see a permission prompt for each one
+unless they pre-allowlist them. Offer:
+
+> I can drop a ready-made allowlist into `.claude/settings.local.json` so
+> you don't have to approve every command. Want me to?
+
+If yes: read `${CLAUDE_SKILL_DIR}/reference/permissions-suggested.json` and
+merge its `permissions.allow` entries into the user's
+`<cwd>/.claude/settings.local.json` (creating the file if needed). Do this
+once per project. If the user says no, just proceed and let them approve
+prompts case by case.
+
+### 0b. Verify prerequisites
 
 ```
-bash $SKILL/scripts/check_prereqs.sh
+bash ${CLAUDE_SKILL_DIR}/scripts/check_prereqs.sh
 ```
 
 If it exits non-zero, read the printed fix commands and **offer to run
 them** via Bash. Typical fixes:
 - `python3 -m pip install --user Pillow`
-- `brew install ffmpeg-full && brew unlink ffmpeg && brew link --overwrite ffmpeg-full`
+- `brew install ffmpeg` (macOS) or `sudo apt install ffmpeg` (Linux)
 
 Do not proceed until all prereqs report `[ok]`.
 
-### 0b. Resolve the fal.ai API key
+### 0c. Resolve the fal.ai API key
 
 ```
-bash $SKILL/scripts/fal_key.sh check
+bash ${CLAUDE_SKILL_DIR}/scripts/fal_key.sh check
 ```
 
 - If "ok" → continue.
@@ -64,13 +79,13 @@ bash $SKILL/scripts/fal_key.sh check
   (link them to https://fal.ai/dashboard/keys). When they paste it,
   persist it:
   ```
-  bash $SKILL/scripts/fal_key.sh save <key>
+  bash ${CLAUDE_SKILL_DIR}/scripts/fal_key.sh save <key>
   ```
   This writes `~/.clipspal/fal_key` (chmod 600). Future sessions don't
   need to ask again. `fal_submit.py` / `fal_poll.py` read it
   automatically — you do NOT need to `export FAL_KEY`.
 
-### 0c. Gather the rest of the inputs
+### 0d. Gather the rest of the inputs
 
 Ask the user (in one message, not three) for:
 
@@ -85,12 +100,12 @@ Ask the user (in one message, not three) for:
 
 Then validate the broll folder:
 ```
-bash $SKILL/scripts/check_broll.sh <broll_folder>
+bash ${CLAUDE_SKILL_DIR}/scripts/check_broll.sh <broll_folder>
 ```
 Exit 0 + file list → continue. Exit 1 → tell user the folder is empty
 or missing, ask for a fixed path.
 
-### 0d. Print the cost estimate + confirm
+### 0e. Print the cost estimate + confirm
 
 Before generating, print:
 
@@ -107,8 +122,8 @@ Before generating, print:
 ```
 export PROJECT_DIR=<chosen output folder, absolute or ./relative>
 mkdir -p $PROJECT_DIR/{frames,clips,payloads,output}
-python3 $SKILL/scripts/state.py init <slug>
-python3 $SKILL/scripts/state.py summary
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py init <slug>
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py summary
 ```
 
 If `state.json` already existed in that folder, this is a **resume** —
@@ -117,9 +132,9 @@ we left off."
 
 ## STEP 2 — Matrix (you, no API)
 
-Read `$SKILL/prompts/matrix.md` and write `<wd>/matrix.json`. Then:
+Read `${CLAUDE_SKILL_DIR}/prompts/matrix.md` and write `<wd>/matrix.json`. Then:
 ```
-python3 $SKILL/scripts/state.py set matrix done
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set matrix done
 ```
 
 ## STEP 3 — CHECKPOINT 1: matrix approval (mandatory)
@@ -134,17 +149,17 @@ row N", "regen 2,4", "regen all" → rewrite those rows and re-checkpoint.
 
 ## STEP 4 — Hooks (you, no API)
 
-Read `$SKILL/prompts/hooks.md` and `$SKILL/reference/hook-library.json`.
+Read `${CLAUDE_SKILL_DIR}/prompts/hooks.md` and `${CLAUDE_SKILL_DIR}/reference/hook-library.json`.
 Pick 5 templates, fill in slots in audience language, write
 `<wd>/hooks.json` with `n`, `text`, and `template_id`. Then:
 ```
-python3 $SKILL/scripts/state.py set hooks done
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set hooks done
 ```
 
 ## STEP 5 — First frames (nano-banana, 5 parallel jobs)
 
 Build the nano-banana prompt from each matrix row using the template in
-`$SKILL/reference/fal-endpoints.md` (which REQUIRES centered framing
+`${CLAUDE_SKILL_DIR}/reference/fal-endpoints.md` (which REQUIRES centered framing
 language — use it verbatim).
 
 Write `<wd>/payloads/frame_<n>.json`:
@@ -160,7 +175,7 @@ Write `<wd>/payloads/frame_<n>.json`:
 Submit all 5:
 ```
 for n in 1 2 3 4 5; do
-  python3 $SKILL/scripts/fal_submit.py frames $n fal-ai/nano-banana \
+  python3 ${CLAUDE_SKILL_DIR}/scripts/fal_submit.py frames $n fal-ai/nano-banana \
     $PROJECT_DIR/payloads/frame_$n.json &
 done; wait
 ```
@@ -168,7 +183,7 @@ done; wait
 Poll all 5:
 ```
 for n in 1 2 3 4 5; do
-  python3 $SKILL/scripts/fal_poll.py frames $n &
+  python3 ${CLAUDE_SKILL_DIR}/scripts/fal_poll.py frames $n &
 done; wait
 ```
 
@@ -184,7 +199,7 @@ Before any clip job runs, show all 5 frame PNGs (`<wd>/frames/01.png` …
 
 On "regen N":
 ```
-python3 $SKILL/scripts/state.py reset frames 2,4
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py reset frames 2,4
 ```
 …then update those matrix rows per user feedback, re-submit those slots,
 re-poll, re-checkpoint.
@@ -222,7 +237,7 @@ pair across 5 outputs — if fewer broll files than 5, reuse from the top.
 
 For each `n` in 1..5:
 ```
-bash $SKILL/scripts/assemble.sh \
+bash ${CLAUDE_SKILL_DIR}/scripts/assemble.sh \
   <wd>/clips/<n>.mp4 \
   <broll_folder>/<chosen file> \
   "<hook text n>" \
@@ -231,7 +246,7 @@ bash $SKILL/scripts/assemble.sh \
 
 When all 5 done:
 ```
-python3 $SKILL/scripts/state.py set assembly done
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set assembly done
 ```
 
 Print the 5 output paths and `open <wd>/output/` so the user sees them.
@@ -245,14 +260,13 @@ are skipped. Pending slots get re-polled.
 
 ### A specific Vidu clip failed
 ```
-python3 $SKILL/scripts/state.py reset clips 3
-python3 $SKILL/scripts/fal_submit.py clips 3 fal-ai/vidu/q3/image-to-video \
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py reset clips 3
+python3 ${CLAUDE_SKILL_DIR}/scripts/fal_submit.py clips 3 fal-ai/vidu/q3/image-to-video \
   $PROJECT_DIR/payloads/clip_3.json
-python3 $SKILL/scripts/fal_poll.py clips 3
+python3 ${CLAUDE_SKILL_DIR}/scripts/fal_poll.py clips 3
 ```
 
 ### Permission prompt fatigue
-Mention to the user: copy `$SKILL/reference/permissions-suggested.json`
+Mention to the user: copy `${CLAUDE_SKILL_DIR}/reference/permissions-suggested.json`
 into `<their cwd>/.claude/settings.local.json` to allowlist the exact
 commands this skill runs.
-
