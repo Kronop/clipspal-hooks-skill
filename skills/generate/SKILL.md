@@ -1,5 +1,5 @@
 ---
-name: clipspal-hooks
+name: generate
 description: Generate 30 TikTok-ready hook videos from a folder of b-roll — a month of daily posts from a single run. Builds a 5-row character matrix, renders each character as a still via fal-ai/gemini-3.1-flash-image-preview, animates them into 3s reaction clips via fal-ai/vidu/q3/image-to-video, picks 30 hook lines from a 500-template library, pairs each of the 5 clips with 6 hooks via round-robin, concatenates with the user's b-roll, and burns in captions with ffmpeg. Use when the user wants TikTok hooks, AI UGC reactions, or short-form video openers for an app, product, or content niche.
 ---
 

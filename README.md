@@ -71,7 +71,7 @@ Or clone the skill directly (no plugin manager):
 
 ```bash
 git clone https://github.com/Kronop/clipspal-hooks-skill /tmp/clipspal-hooks-skill
-cp -R /tmp/clipspal-hooks-skill/skills/clipspal-hooks ~/.claude/skills/clipspal-hooks
+cp -R /tmp/clipspal-hooks-skill/skills/generate ~/.claude/skills/generate
 ```
 
 Then make sure you have the dependencies:
@@ -98,7 +98,7 @@ make tiktok hooks for my protein tracker app
 
 …or any natural-language equivalent. Claude will load the skill on its own
 from the description. (Plugin install also exposes the namespaced command
-`/clipspal-hooks:clipspal-hooks` if you prefer to invoke it explicitly.)
+`/clipspal-hooks:generate` if you prefer to invoke it explicitly.)
 
 The skill will:
 
@@ -120,12 +120,12 @@ the skill picks up exactly where it left off.
 ## Tune the look
 
 - Want a different hook text style? Edit
-  `skills/clipspal-hooks/scripts/render_overlay.py` (font size, color,
+  `skills/generate/scripts/render_overlay.py` (font size, color,
   stroke, position) — same parameters as the prod Lambda renderer.
 - Want different reaction archetypes? Edit
-  `skills/clipspal-hooks/prompts/matrix.md`.
+  `skills/generate/prompts/matrix.md`.
 - Want different hook templates? Edit
-  `skills/clipspal-hooks/reference/hook-library.json` (curated copy of
+  `skills/generate/reference/hook-library.json` (curated copy of
   the prod hook library).
 
 ## What's inside
@@ -135,7 +135,7 @@ clipspal-hooks-skill/
 ├── .claude-plugin/
 │   ├── plugin.json          # Plugin manifest (for /plugin install).
 │   └── marketplace.json     # Marketplace entry (for /plugin marketplace add).
-└── skills/clipspal-hooks/
+└── skills/generate/
     ├── SKILL.md             # The runbook Claude Code follows.
     ├── prompts/             # Prose prompts: matrix + hook selection.
     ├── scripts/
