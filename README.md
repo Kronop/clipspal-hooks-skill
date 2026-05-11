@@ -40,7 +40,7 @@ run costs your fal account roughly:
 Clone into your Claude Code skills folder:
 
 ```bash
-git clone https://github.com/YOUR_ORG/clipspal-hooks-skill \
+git clone https://github.com/Kronop/clipspal-hooks-skill \
   ~/.claude/skills/clipspal-hooks
 ```
 
