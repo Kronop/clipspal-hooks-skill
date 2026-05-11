@@ -91,11 +91,15 @@ Ask the user (in one message, not three) for:
 
 1. **Project description** — what is this content for? (one paragraph)
 2. **Broll folder path** — absolute path to a folder of `.mp4`/`.mov`
-   files you already have. (If they have none, point them at TikTok
+   files you already have. **If the user gives a file path, use its
+   parent directory.** (If they have none, point them at TikTok
    downloaders, royalty-free libraries, or screen recordings of their
    product.)
-3. **Output folder name** — defaults to `./clipspal-hooks/`. They can
-   override; never dump artifacts into the bare cwd.
+3. **Output folder** — defaults to `<broll_folder>/clipspal-hooks-output/`
+   so videos land right next to the source broll, not in some unrelated
+   cwd. The user can override, but NEVER default to `./clipspal-hooks/`
+   in the current working directory — that's how outputs end up in
+   random folders the user can't find.
 4. **Language** — defaults to "en".
 
 Then validate the broll folder:
@@ -104,6 +108,10 @@ bash ${CLAUDE_SKILL_DIR}/scripts/check_broll.sh <broll_folder>
 ```
 Exit 0 + file list → continue. Exit 1 → tell user the folder is empty
 or missing, ask for a fixed path.
+
+When confirming back to the user, **print the absolute output path** so
+they can see exactly where the videos will land. e.g.
+`Output: /Users/x/Desktop/myproj/broll/clipspal-hooks-output/`.
 
 ### 0e. Print the cost estimate + confirm
 

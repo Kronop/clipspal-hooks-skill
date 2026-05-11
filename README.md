@@ -21,7 +21,9 @@ in Claude Code.
    files and burns in the hook line (TikTok Sans Bold + Apple color
    emoji, same renderer as the prod free tool).
 
-Output: 5 ready-to-post 1080×1920 mp4s in `./clipspal-hooks/output/`.
+Output: 5 ready-to-post 1080×1920 mp4s in
+`<broll_folder>/clipspal-hooks-output/output/` — co-located with the
+b-roll so you can find them, not buried in some unrelated cwd.
 
 ## Cost per run
 
@@ -34,12 +36,26 @@ run costs your fal account roughly:
 
 ## Install
 
-In Claude Code:
+**Run these two commands in Claude Code one at a time — wait for the first
+to succeed before pasting the second. Pasting both at once will mash them
+into a malformed URL.**
+
+Step 1 — register the marketplace:
 
 ```
 /plugin marketplace add Kronop/clipspal-hooks-skill
+```
+
+Wait for `Successfully added marketplace: clipspal-marketplace`, then —
+
+Step 2 — install the plugin:
+
+```
 /plugin install clipspal-hooks@clipspal-marketplace
 ```
+
+Then run `/reload-plugins` (or restart Claude Code) so the skill is
+picked up in the current session.
 
 Or clone the skill directly (no plugin manager):
 
@@ -78,8 +94,9 @@ The skill will:
 
 1. Verify your prerequisites.
 2. Ask for your fal.ai API key (once — persists to `~/.clipspal/fal_key`).
-3. Ask for the absolute path to your b-roll folder and an output folder
-   name (default `./clipspal-hooks/`).
+3. Ask for the absolute path to your b-roll folder. Outputs default to
+   `<broll_folder>/clipspal-hooks-output/` so they land next to your
+   source clips — you can override if you want them elsewhere.
 4. Generate a character matrix and **wait for your approval**.
 5. Render 5 first frames and **wait for your approval again** before
    spending the bigger fal credits on Vidu.
