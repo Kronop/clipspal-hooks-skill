@@ -110,10 +110,14 @@ or missing, ask for a fixed path.
 Before generating, print:
 
 > This run will use your fal.ai credits:
->   - 5 nano-banana character images (~$0.20)
->   - 5 Vidu 3s reaction clips (~$0.75)
->   - Total: ~$0.95
+>   - 5 nano-banana character images (~USD 0.20)
+>   - 5 Vidu 3s reaction clips (~USD 0.75)
+>   - Total: ~USD 0.95
 > Reply "yes" to proceed.
+
+(Use "USD 0.XX" instead of "$0.XX" — bare `$0` gets substituted with the
+slash-command's first arg when the runbook is rendered, producing
+nonsense like "generate.20".)
 
 **Wait for explicit "yes"** before moving on.
 
@@ -192,7 +196,7 @@ done; wait
 Before any clip job runs, show all 5 frame PNGs (`<wd>/frames/01.png` …
 `05.png`) using the Read tool so the user can see them inline. Then ask:
 
-> Approve these characters? "yes" to render 3s clips (~$0.75), "regen N"
+> Approve these characters? "yes" to render 3s clips (~USD 0.75), "regen N"
 > (e.g. "regen 2,4") to redo specific rows, "regen all" to redo all five.
 
 **Wait for an explicit answer.** Do not submit clip jobs until approval.
@@ -232,24 +236,30 @@ Submit + poll with `kind=clips`, `model_id=fal-ai/vidu/q3/image-to-video`.
 
 ## STEP 8 — Assemble (local)
 
-List the user's broll files (from check_broll.sh output earlier). Round-robin
-pair across 5 outputs — if fewer broll files than 5, reuse from the top.
+**Use the script. Do NOT write your own shell loop.** A previous version
+of this runbook asked the LLM to drive a 1..5 loop in the user's shell,
+and zsh's 1-indexed arrays vs bash's 0-indexed arrays caused off-by-one
+bugs (hook 1 → video 2, hook 5 dropped). The script reads `hooks.json`
+directly, so the indexing is deterministic regardless of shell.
 
-For each `n` in 1..5:
 ```
-bash ${CLAUDE_SKILL_DIR}/scripts/assemble.sh \
-  <wd>/clips/<n>.mp4 \
-  <broll_folder>/<chosen file> \
-  "<hook text n>" \
-  <wd>/output/<n>.mp4
+bash ${CLAUDE_SKILL_DIR}/scripts/assemble_all.sh <wd> <broll_folder>
 ```
 
-When all 5 done:
+The script handles:
+- Round-robin pairing across the broll files (reuses from the top if
+  fewer broll files than hooks).
+- Single-clip fan-out: if `clips/NN.mp4` doesn't exist for a slot, it
+  falls back to `clips/01.mp4`. So the "render 1 clip, produce 5 final
+  variants" flow works without any special-case code.
+- Parallel ffmpeg jobs, one per output.
+
+When it exits 0:
 ```
 python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set assembly done
 ```
 
-Print the 5 output paths and `open <wd>/output/` so the user sees them.
+Print the output paths and `open <wd>/output/` so the user sees them.
 
 ## Resume / failure recipes
 

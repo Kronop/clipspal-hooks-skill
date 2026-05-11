@@ -1,9 +1,9 @@
 {
-  "_comment": "Drop this into .claude/settings.local.json (or merge with existing) inside the folder where you run the clipspal-hooks skill. It allowlists the exact commands the skill issues so you stop seeing permission prompts mid-run. Covers both plugin install (~/.claude/plugins/clipspal-hooks/) and manual install (~/.claude/skills/clipspal-hooks/).",
+  "_comment": "Drop this into .claude/settings.local.json (or merge with existing) inside the folder where you run the clipspal-hooks skill. It allowlists the exact commands the skill issues so you stop seeing permission prompts mid-run. Covers plugin install (~/.claude/plugins/cache/clipspal-marketplace/clipspal-hooks/<version>/...) and manual install (~/.claude/skills/clipspal-hooks/).",
   "permissions": {
     "allow": [
-      "Bash(python3 ~/.claude/plugins/clipspal-hooks/skills/clipspal-hooks/scripts/*:*)",
-      "Bash(bash ~/.claude/plugins/clipspal-hooks/skills/clipspal-hooks/scripts/*:*)",
+      "Bash(python3 ~/.claude/plugins/cache/clipspal-marketplace/clipspal-hooks/*/skills/clipspal-hooks/scripts/*:*)",
+      "Bash(bash ~/.claude/plugins/cache/clipspal-marketplace/clipspal-hooks/*/skills/clipspal-hooks/scripts/*:*)",
       "Bash(python3 ~/.claude/skills/clipspal-hooks/scripts/*:*)",
       "Bash(bash ~/.claude/skills/clipspal-hooks/scripts/*:*)",
       "Bash(ffmpeg:*)",
