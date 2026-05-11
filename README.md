@@ -1,5 +1,7 @@
 # ClipsPal Hooks — a Claude Code skill
 
+![ClipsPal Hooks](./hero.png)
+
 Drop in your b-roll, describe what you do, get 5 TikTok-ready videos with
 AI hook clips + burned-in captions. No signup, no watermark, runs locally
 in Claude Code.
