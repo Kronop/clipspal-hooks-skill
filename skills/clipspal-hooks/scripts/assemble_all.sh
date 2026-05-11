@@ -3,8 +3,10 @@
 #
 # Reads the project's hooks.json + clips/ + the broll folder, then for each
 # hook n in hooks.json runs assemble.sh with:
-#   - clip:    <project>/clips/<NN>.mp4   if it exists,
-#              else <project>/clips/01.mp4 (single-clip "fan-out" mode)
+#   - clip:    one of <project>/clips/*.mp4, round-robin'd. With the
+#              default flow (5 clips × 30 hooks) each clip plays under
+#              6 different hook captions. If only one clip exists it
+#              fans out across every output.
 #   - broll:   the n-th broll file from the supplied folder, round-robin
 #              (reuses from the top if fewer broll files than hooks)
 #   - hook:    the `text` field of hooks.json[n-1]
@@ -58,20 +60,25 @@ if [[ "$HOOK_COUNT" -eq 0 ]]; then
   exit 1
 fi
 
+# Collect available clip files (sorted, deterministic), then round-robin
+# across however many we found. Handles 1 clip (fan-out), 5 clips
+# (default — each plays under 6 hooks), or any other count.
+CLIP_FILES=()
+while IFS= read -r -d '' f; do
+  CLIP_FILES+=("$f")
+done < <(find "$PROJECT_DIR/clips" -maxdepth 1 -type f -iname "*.mp4" ! -name ".*" -print0 2>/dev/null | sort -z)
+
+if [[ ${#CLIP_FILES[@]} -eq 0 ]]; then
+  echo "no clips in $PROJECT_DIR/clips/" >&2
+  exit 1
+fi
+
 pids=()
 for ((i=0; i<HOOK_COUNT; i++)); do
   n=$((i+1))
   nn=$(printf '%02d' "$n")
 
-  # Pick clip: prefer NN.mp4, else fall back to 01.mp4 (single-clip mode).
-  if [[ -f "$PROJECT_DIR/clips/$nn.mp4" ]]; then
-    CLIP="$PROJECT_DIR/clips/$nn.mp4"
-  elif [[ -f "$PROJECT_DIR/clips/01.mp4" ]]; then
-    CLIP="$PROJECT_DIR/clips/01.mp4"
-  else
-    echo "no clip for slot $n and no clips/01.mp4 to fall back to" >&2
-    exit 1
-  fi
+  CLIP="${CLIP_FILES[$(( i % ${#CLIP_FILES[@]} ))]}"
 
   # Round-robin broll.
   BROLL="${BROLL_FILES[$(( i % ${#BROLL_FILES[@]} ))]}"

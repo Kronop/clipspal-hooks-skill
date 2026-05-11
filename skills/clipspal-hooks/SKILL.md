@@ -1,13 +1,14 @@
 ---
 name: clipspal-hooks
-description: Generate 5 TikTok-ready hook videos from a folder of b-roll. Builds a 5-row character matrix, renders each character as a still via fal-ai/gemini-3.1-flash-image-preview, animates them into 3s reaction clips via fal-ai/vidu/q3/image-to-video, concatenates with the user's b-roll, and burns in captions with ffmpeg. Use when the user wants TikTok hooks, AI UGC reactions, or short-form video openers for an app, product, or content niche.
+description: Generate 30 TikTok-ready hook videos from a folder of b-roll — a month of daily posts from a single run. Builds a 5-row character matrix, renders each character as a still via fal-ai/gemini-3.1-flash-image-preview, animates them into 3s reaction clips via fal-ai/vidu/q3/image-to-video, picks 30 hook lines from a 500-template library, pairs each of the 5 clips with 6 hooks via round-robin, concatenates with the user's b-roll, and burns in captions with ffmpeg. Use when the user wants TikTok hooks, AI UGC reactions, or short-form video openers for an app, product, or content niche.
 ---
 
 # ClipsPal Hooks
 
 A free skill from ClipsPal. Drop in your b-roll, describe what you do, and
-get 5 TikTok-ready videos with AI hook clips + burned-in captions. No
-signup, no watermark, runs locally in Claude Code.
+get 30 TikTok-ready videos with AI hook clips + burned-in captions —
+a month of daily posts from a single ~$2.70 run. No signup, no watermark,
+runs locally in Claude Code.
 
 ClipsPal posts 2 AI TikToks to grow your app, every day — start free at
 clipspal.com.
@@ -27,7 +28,7 @@ clipspal.com.
    Hooks → `prompts/hooks.md` + `reference/hook-library.json`.
 5. **3-second clips, Vidu q3 image-to-video.** Never Kling, never 5s.
 6. **`fal-ai/gemini-3.1-flash-image-preview` (Nano Banana 2) for character stills.** Never Flux, Imagen, or the older `fal-ai/nano-banana` — the prod ClipsPal pipeline is on Gemini 3.1 Flash Image and this skill must match it.
-7. **Default count is 5.** Only generate more if the user says so.
+7. **Defaults: 5 characters → 5 clips → 30 hooks → 30 videos.** Each of the 5 character clips gets paired with 6 different hook lines + b-roll round-robin → 30 final videos. Same fal spend as before (~$2.70), 6× the output. Only adjust counts if the user explicitly asks.
 8. **MANDATORY checkpoints — wait for explicit user approval at each:**
    - After step 0 (intake) — confirm cost + folder name before any spend
    - After the matrix (step 3) — before any fal call
@@ -120,7 +121,9 @@ Before generating, print:
 > This run will use your fal.ai credits:
 >   - 5 Gemini 3.1 Flash Image character stills at 1K (~USD 0.40)
 >   - 5 Vidu 3s reaction clips at 720p (~USD 2.30)
->   - Total: ~USD 2.70
+>   - Total: ~USD 2.70 → 30 final TikTok videos (~USD 0.09 each).
+>     Each of the 5 character clips is paired with 6 hook lines for a
+>     month of daily TikToks from a single run.
 > Reply "yes" to proceed. (Reply "yes 540p" to drop clips to 540p
 > ≈ USD 1.45 total — slightly softer but half the spend.)
 
@@ -163,11 +166,18 @@ row N", "regen 2,4", "regen all" → rewrite those rows and re-checkpoint.
 ## STEP 4 — Hooks (you, no API)
 
 Read `${CLAUDE_SKILL_DIR}/prompts/hooks.md` and `${CLAUDE_SKILL_DIR}/reference/hook-library.json`.
-Pick 5 templates, fill in slots in audience language, write
-`<wd>/hooks.json` with `n`, `text`, and `template_id`. Then:
+Pick **30 distinct templates** (the library has 500+), fill in slots in
+audience language, write `<wd>/hooks.json` as a 30-entry array with `n`,
+`text`, and `template_id`. Then:
 ```
 python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set hooks done
 ```
+
+At assembly time, the 5 character clips get round-robin'd across the 30
+hooks (clip 1 → hooks 1, 6, 11, 16, 21, 26 / clip 2 → hooks 2, 7, 12, …).
+So each clip's emotion will play under 6 different captions — keep the
+hook tones varied but compatible with a generic reaction. See
+`prompts/hooks.md` for the full quality bar.
 
 ## STEP 5 — Characters (gemini-3.1-flash-image-preview, 5 parallel jobs)
 
@@ -270,11 +280,14 @@ bash ${CLAUDE_SKILL_DIR}/scripts/assemble_all.sh <wd> <broll_folder>
 ```
 
 The script handles:
+- Round-robin pairing across the 5 character clips (video n uses clip
+  `((n-1) % num_clips) + 1`). So the default flow — 5 clips × 30 hooks
+  — works out to 6 hook variants per clip.
 - Round-robin pairing across the broll files (reuses from the top if
   fewer broll files than hooks).
-- Single-clip fan-out: if `clips/NN.mp4` doesn't exist for a slot, it
-  falls back to `clips/01.mp4`. So the "render 1 clip, produce 5 final
-  variants" flow works without any special-case code.
+- Single-clip fan-out: if you only generated `clips/01.mp4`, every
+  output reuses that single clip with different hooks + broll. Still
+  works, just less character variety in the feed.
 - Parallel ffmpeg jobs, one per output.
 
 When it exits 0:

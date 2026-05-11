@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "clipspal-hooks",
-      "description": "Drop in your b-roll, describe what you do, get 5 TikTok-ready videos with AI hook clips + burned-in captions. Runs locally, you bring a fal.ai key.",
+      "description": "Drop in your b-roll, describe what you do, get 30 TikTok-ready videos with AI hook clips + burned-in captions — a month of daily posts for ~$2.70. Runs locally, you bring a fal.ai key.",
       "author": {
         "name": "ClipsPal",
         "url": "https://clipspal.com"

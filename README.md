@@ -2,9 +2,9 @@
 
 ![ClipsPal Hooks](./hero.jpg)
 
-Drop in your b-roll, describe what you do, get 5 TikTok-ready videos with
-AI hook clips + burned-in captions. No signup, no watermark, runs locally
-in Claude Code.
+Drop in your b-roll, describe what you do, get **30 TikTok-ready videos**
+with AI hook clips + burned-in captions — a month of daily posts from a
+single ~$2.70 run. No signup, no watermark, runs locally in Claude Code.
 
 ## How it works
 
@@ -16,14 +16,15 @@ in Claude Code.
    (Nano Banana 2 / Gemini 3.1 Flash Image — the same model the prod
    ClipsPal pipeline uses).
 4. Each character is animated into a 3-second reaction clip via
-   `fal-ai/vidu/q3/image-to-video`.
-5. Five hook lines are picked from a curated library and tailored to your
-   project.
-6. Local `ffmpeg` concatenates each hook clip with one of your b-roll
-   files and burns in the hook line (TikTok Sans Bold + Apple color
-   emoji, same renderer as the prod free tool).
+   `fal-ai/vidu/q3/image-to-video`. **5 clips total** — that's the
+   expensive part, and we only spend on it once per run.
+5. **30 hook lines** are picked from a curated 500-template library and
+   tailored to your project.
+6. Local `ffmpeg` pairs each of the 5 character clips with 6 different
+   hook lines + round-robin b-roll, then burns in the captions (TikTok
+   Sans Bold + Apple color emoji, same renderer as the prod free tool).
 
-Output: 5 ready-to-post 1080×1920 mp4s in
+Output: 30 ready-to-post 1080×1920 mp4s in
 `<broll_folder>/clipspal-hooks-output/output/` — co-located with the
 b-roll so you can find them, not buried in some unrelated cwd.
 
@@ -34,10 +35,14 @@ run costs your fal account roughly:
 
 - 5 Gemini 3.1 Flash Image character stills at 1K: ~$0.40
 - 5 Vidu 3-second clips at 720p: ~$2.30
-- **Total: ~$2.70** at the prod-match defaults
+- **Total: ~$2.70 → 30 final videos → ~$0.09 per finished TikTok.**
+
+That's a month of daily TikToks for less than the price of a coffee. The
+trick: each of the 5 character clips gets reused under 6 different hook
+captions, so the expensive Vidu generations earn their keep 6× over.
 
 Drop the Vidu resolution to 540p (still ~9:16 vertical, slightly
-softer) for ~$1.45 total.
+softer) for ~$1.45 total (~$0.05 per TikTok).
 
 ## Install
 
@@ -102,10 +107,12 @@ The skill will:
 3. Ask for the absolute path to your b-roll folder. Outputs default to
    `<broll_folder>/clipspal-hooks-output/` so they land next to your
    source clips — you can override if you want them elsewhere.
-4. Generate a character matrix and **wait for your approval**.
+4. Generate a 5-character matrix and **wait for your approval**.
 5. Render 5 characters (still images) and **wait for your approval
    again** before spending the bigger fal credits on Vidu.
-6. Render the clips, assemble the videos, and open the output folder.
+6. Render 5 reaction clips, pick 30 hook lines, then assemble 30 final
+   videos by pairing each clip with 6 different hooks + b-roll
+   round-robin. Open the output folder.
 
 If you Ctrl-C mid-run, just re-run the same command from the same folder —
 the skill picks up exactly where it left off.
