@@ -4,11 +4,6 @@ Drop in your b-roll, describe what you do, get 5 TikTok-ready videos with
 AI hook clips + burned-in captions. No signup, no watermark, runs locally
 in Claude Code.
 
-Built by [ClipsPal](https://clipspal.com). The full pipeline (scripts,
-voiceover, subtitles, posting) lives in the app.
-
-![hero](./docs/hero.png) <!-- optional -->
-
 ## How it works
 
 1. You describe your project and point at a folder of your existing b-roll.
